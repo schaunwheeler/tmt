@@ -14,7 +14,8 @@
 # Machine:         Schaun Wheeler's Dell Precision T7500 and MacBook Pro
 
 # Copyright (c) 2012, under the Simplified BSD License.  
-# For more information on FreeBSD see: http://www.opensource.org/licenses/bsd-license.php
+# For more information on FreeBSD see: 
+# http://www.opensource.org/licenses/bsd-license.php
 # All rights reserved.                                                         
 
 # Load libraries
@@ -29,7 +30,7 @@ SetEnvVarW <- function(...){
 	print("    Xpdf from http://www.foolabs.com/xpdf/download.html")
 	print("    Aspell from http://aspell.net/win32/")
 	print("    Package 'rJava' from http://cran.r-project.org/web/packages/rJava/index.html")
-  print("    Package 'RWekajars' from http://cran.r-project.org/web/packages/RWekajars/index.html")
+    print("    Package 'RWekajars' from http://cran.r-project.org/web/packages/RWekajars/index.html")
 	
 	sys <- Sys.info()
 	
@@ -45,39 +46,53 @@ SetEnvVarW <- function(...){
 	
 	wekahome.vars <- unique(c(strsplit(Sys.getenv("WEKAHOME"),split=";")))[[1]]
 	
-	classpath.vars <- unique(c(strsplit(Sys.getenv("classpath"),split=";")))[[1]]
+	classpath.vars <- unique(c(strsplit(Sys.getenv("classpath"),
+	  split=";")))[[1]]
 	
-	r.path <- grep('R.exe',list.files(path = locs[1], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
-	rJava.path <- grep('rJava.dll',list.files(path = locs[1], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
-	pdftotext.path <- grep('pdftotext.exe',list.files(path = locs[1], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
-	aspell.path <- grep('aspell.exe',list.files(path = locs[1], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
-	java.path <-  grep('java.dll',list.files(path = locs[1], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)[1]
-	jvm.path <-  grep('jvm.dll',list.files(path = locs[1], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)[1]
-	weka.path <-  grep('weka.jar',list.files(path = locs[1], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)[1]
+	r.path <- grep('R.exe',list.files(path = locs[1], all.files = T, 
+	  full.names = TRUE, recursive = TRUE),value=TRUE)
+	rJava.path <- grep('rJava.dll',list.files(path = locs[1], all.files = T, 
+	  full.names = TRUE, recursive = TRUE),value=TRUE)
+	pdftotext.path <- grep('pdftotext.exe',list.files(path = locs[1], 
+	  all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+	aspell.path <- grep('aspell.exe',list.files(path = locs[1], all.files = T, 
+	  full.names = TRUE, recursive = TRUE),value=TRUE)
+	java.path <-  grep('java.dll',list.files(path = locs[1], all.files = T, 
+	  full.names = TRUE, recursive = TRUE),value=TRUE)[1]
+	jvm.path <-  grep('jvm.dll',list.files(path = locs[1], all.files = T, 
+	  full.names = TRUE, recursive = TRUE),value=TRUE)[1]
+	weka.path <-  grep('weka.jar',list.files(path = locs[1], all.files = T, 
+	  full.names = TRUE, recursive = TRUE),value=TRUE)[1]
 	
 	
 	if(length(r.path) == 0){
-		r.path <- grep('R.exe',list.files(path = locs[2], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+		r.path <- grep('R.exe',list.files(path = locs[2], all.files = T, 
+		  full.names = TRUE, recursive = TRUE),value=TRUE)
 	}
 	
 	if(length(rJava.path) == 0){
-		rJava.path <- grep('rJava.dll',list.files(path = locs[2], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+		rJava.path <- grep('rJava.dll',list.files(path = locs[2], all.files = T, 
+		  full.names = TRUE, recursive = TRUE),value=TRUE)
 	}
 	
 	if(length(pdftotext.path) == 0){
-		pdftotext.path <- grep('pdftotext.exe',list.files(path = locs[2], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+		pdftotext.path <- grep('pdftotext.exe',list.files(path = locs[2], 
+		  all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
 	}
 	
 	if(length(aspell.path) == 0){
-		aspell.path <- grep('aspell.exe',list.files(path = locs[2], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+		aspell.path <- grep('aspell.exe',list.files(path = locs[2], 
+		  all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
 	}
 	
 	if(length(java.path) == 0){
-		java.path <- grep('java.dll',list.files(path = locs[2], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+		java.path <- grep('java.dll',list.files(path = locs[2], all.files = T, 
+		  full.names = TRUE, recursive = TRUE),value=TRUE)
 	}
 	
 	if(length(jvm.path) == 0){
-		jvm.path <- grep('jvm.dll',list.files(path = locs[2], all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+		jvm.path <- grep('jvm.dll',list.files(path = locs[2], all.files = T, 
+		  full.names = TRUE, recursive = TRUE),value=TRUE)
 	}
 	
 	if(length(r.path) > 1){
@@ -112,25 +127,24 @@ SetEnvVarW <- function(...){
 	jvm.path <-  gsub("(?<=/)\\w+[.]\\w+$", "", jvm.path, perl = T)
 	weka.path <-  gsub("(?<=/)\\w+[.]\\w+$", "", weka.path, perl = T)
 	
-	Sys.setenv(PATH = paste(unique(c(strsplit(Sys.getenv("PATH"),split=";")[[1]],
-																	 r.path,
-																	 rJava.path,
-																	 java.path,
-																	 jvm.path,
-																	 pdftotext.path,
-																	 aspell.path)),
-													collapse = ";"), 
-						 JAVA_HOME = paste(r.path,
-						 									rJava.path,
-						 									java.path,
-						 									jvm.path, 
-						 									sep = ";"), 
-						 NOAWT = "TRUE",
-						 WEKAHOME = weka.path,
-						 CLASSPATH = weka.path)
-	
+	Sys.setenv(PATH = paste(
+	  unique(c(strsplit(Sys.getenv("PATH"),split=";")[[1]],
+								r.path,
+								rJava.path,
+								java.path,
+								jvm.path,
+								pdftotext.path,
+								aspell.path)),
+							collapse = ";"), 
+						JAVA_HOME = paste(r.path,
+						 		rJava.path,
+						 		java.path,
+						 		jvm.path, 
+						 	sep = ";"), 
+						NOAWT = "TRUE",
+						WEKAHOME = weka.path,
+						CLASSPATH = weka.path)
 }
-
 
 MakeWordLists <- functon(wlists = c("gi","afinn","liu")){
 	
@@ -176,9 +190,9 @@ MakeWordLists <- functon(wlists = c("gi","afinn","liu")){
 		print("Creating lists from Bing Liu lexicon.")
 		
 		liu.pos <- read.delim("https://github.com/schaunwheeler/tmt/blob/master/liu_positive_words.txt", 
-													header=F, as.is=T, skip=35)$V1
+								header=F, as.is=T, skip=35)$V1
 		liu.neg <- read.delim("https://github.com/schaunwheeler/tmt/blob/master/liu_negative_words.txt", 
-													header=F, as.is=T, skip=35)$V1
+								header=F, as.is=T, skip=35)$V1
 	}
 
 	# Combine and clean word lists
@@ -298,7 +312,8 @@ CleanText <- function(x, stops, neutralize=T, remove=NULL){
 	
 	# Insert apostraphes in all contactions
 	x <- gsub("\\b(are|ca|could|did|does|do|had|has|have)nt\\b", "\\1n't", x)
-	x <- gsub("\\b(is|might|mus|sha|should|was|were|would|wo)nt\\b", "\\1n't", x)
+	x <- gsub("\\b(is|might|mus|sha|should|was|were|would|wo)nt\\b", 
+	          "\\1n't", x)
 	x <- gsub("\\b(that|there|where|who)(d|ll|s)\\b", "\\1'\\2", x)
 	x <- gsub("\\b(she|he)(s)\\b", "\\1'\\2", x)
 	x <- gsub("\\bi(m|ve)", "i'\\1", x)
@@ -311,14 +326,14 @@ CleanText <- function(x, stops, neutralize=T, remove=NULL){
 	# Neutralize
 	if(neutralize == T){
 		x <- gsub("^[[:print:]]*([[:punct:]]+|no idea|don.?t know|\\bn[[:punct:]]?a[[:punct:]]?\\b)[[:print:]]*$",
-							"", x, ignore.case=T)
+				  "", x, ignore.case=T)
 		x <- gsub("^(.)\\1*$", "", x)
 		x[x == "" | is.na(x)] <- "neutral"
 	}
 	
 	if(!is.null(remove)){
 		x <- gsub(paste("\\b(", paste(remove, collapse = "|"), ")\\w*?\\b", 
-										sep=""), "", x)
+									sep=""), "", x)
 		if(neutralize == T){
 			x[x == "" | grepl("^\\s+$", x)] <- "neutral"
 		}else{
@@ -333,7 +348,7 @@ CleanText <- function(x, stops, neutralize=T, remove=NULL){
 }
 
 AspellCheck <- function(input, output = "eval", sep = FALSE, cap.flag = "none", 
-												ignore=NULL, split.missing = FALSE){
+						ignore=NULL, split.missing = FALSE){
 	
 	input <- unlist(strsplit(input, split="\\s+"))
 	
@@ -358,7 +373,7 @@ AspellCheck <- function(input, output = "eval", sep = FALSE, cap.flag = "none",
 	x <- input[!skip.words]
 	
 	check <- aspell(as.factor(x), 
-									control = c("--master=en_US --sug-mode=fast"))
+					control = c("--master=en_US --sug-mode=fast"))
 	
 	if(nrow(check)==0){
 		if(output == "eval"){
@@ -424,7 +439,7 @@ SplitWords <- function(x, correction = F){
 	
 	check.fun <- function(x){
 		!(x %in% aspell(as.factor(x), 
-										control = c("--master=en_US --sug-mode=ultra"))$Original)
+					control = c("--master=en_US --sug-mode=ultra"))$Original)
 	}
 	
 	x <- paste(x, collapse=" ")
@@ -456,8 +471,8 @@ SplitWords <- function(x, correction = F){
 			tst <- substring(z,nchar(out)+1,nchar(z))
 			if(correction == T){
 				sugs <- unlist(aspell(as.factor(tst), 
-															control = c(
-																"--master=en_US --sug-mode=ultra"))$Suggestions)
+								control = c(
+								"--master=en_US --sug-mode=ultra"))$Suggestions)
 				if(length(sugs) == 0){
 					out
 				}else{
@@ -497,7 +512,7 @@ CompleteStem <- function(stemmed, unstemmed, stem.type="prevalent"){
 		x <- stemmed[leave]
 		
 		restemmed <- try(stemCompletion(x, Corpus(VectorSource(sent.dict)), 
-																		type=stem.type), silent=T)
+										type=stem.type), silent=T)
 		if(class(restemmed) == "try-error"){
 			restemmed <- x
 		}
@@ -518,9 +533,9 @@ GetSentiment <- function(vec, pos, neg){
 	
 	poslist <- lapply(posind, function(i){
 		first <- mapply(function(x,...){sum(x!=(-1))}, 
-										gregexpr(paste("\\b",pos[i],"\\b", sep=""), vec))
+					gregexpr(paste("\\b",pos[i],"\\b", sep=""), vec))
 		fake <- mapply(function(x,...){sum(x!=(-1))}, 
-									 gregexpr(paste("(not|no)\\s(\\w+\\s)?",pos[i],"\\b"), vec))
+					gregexpr(paste("(not|no)\\s(\\w+\\s)?",pos[i],"\\b"), vec))
 		out <- first-fake
 		setTxtProgressBar(pb, i)
 		out
@@ -532,9 +547,9 @@ GetSentiment <- function(vec, pos, neg){
 	
 	neglist <- lapply(negind, function(i){
 		first <- mapply(function(x,...){sum(x!=(-1))}, 
-										gregexpr(paste("\\b",neg[i],"\\b", sep=""), vec))
+					gregexpr(paste("\\b",neg[i],"\\b", sep=""), vec))
 		fake <- mapply(function(x,...){sum(x!=(-1))}, 
-									 gregexpr(paste("(not|no)\\s(\\w+\\s)?",neg[i],"\\b"), vec))
+					gregexpr(paste("(not|no)\\s(\\w+\\s)?",neg[i],"\\b"), vec))
 		out <- first-fake
 		setTxtProgressBar(pb, i)
 		out
@@ -567,7 +582,7 @@ PlotSentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE,
 	require(Matrix)
 	
 	tdm <- removeSparseTerms(TermDocumentMatrix(Corpus(VectorSource(texts))), 
-													 (length(texts)-2)/length(texts))
+							 (length(texts)-2)/length(texts))
 	
 	if(binary == T){
 	tdm.sparse <- sparseMatrix(
@@ -590,7 +605,7 @@ PlotSentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE,
 		"frequency" = rowSums(tdm.sparse),
 		"positive" = rowSums(tdm.sparse[,colnames(tdm.sparse) %in% posind]),
 		"negative" = rowSums(tdm.sparse[,colnames(tdm.sparse) %in% negind])), 
-														stringsAsFactors = FALSE)
+					stringsAsFactors = FALSE)
 	
 	all.freq$frequency <- as.numeric(all.freq$frequency)
 	all.freq$positive <- as.numeric(all.freq$positive)
@@ -599,9 +614,11 @@ PlotSentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE,
 	all.freq <- all.freq[!(all.freq$positive == 0 & all.freq$negative == 0),]
 	
 	
-	all.freq$difference <- (all.freq$positive-all.freq$negative)/all.freq$frequency
+	all.freq$difference <- (all.freq$positive-all.freq$negative)/
+							all.freq$frequency
 	
-	all.freq$polarity <- (all.freq$positive+all.freq$negative)/all.freq$frequency
+	all.freq$polarity <- (all.freq$positive+all.freq$negative)/
+							all.freq$frequency
 		
 	final.freq <- arrange(all.freq,-frequency)[1:n,"terms"]
 	final.pola <- arrange(all.freq,-polarity)[1:n,"terms"]
@@ -622,16 +639,18 @@ PlotSentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE,
 					digits=0),include.lowest = T)
 	
 	levels(final$occurrence) <- gsub("[,]", "-", levels(final$occurrence))
-	levels(final$occurrence) <- gsub("[^[:digit:]-]", "", levels(final$occurrence))
+	levels(final$occurrence) <- gsub("[^[:digit:]-]", "", 
+										levels(final$occurrence))
 	
 	
-	final$terms <- reorder.factor(as.factor(final$terms), new.order = arrange(final,polarity)[,"terms"])
+	final$terms <- reorder.factor(as.factor(final$terms), 
+					new.order = arrange(final,polarity)[,"terms"])
 	
 	final$color <- rep(NA, nrow(final))
 	final$color[final$terms %in% final.freq] <- "High Frequency"
 	final$color[final$terms %in% final.pola] <- "High Polarity"
-	final$color[(final$terms %in% final.pola) & (final$terms %in% final.freq)] <- 
-		"High Frequency and Polarity"
+	final$color[(final$terms %in% final.pola) & 
+	  (final$terms %in% final.freq)] <- "High Frequency and Polarity"
 	
 	n2 <- ifelse(type == "both",n*2,n)
 	if(type == "both"){
@@ -646,19 +665,19 @@ PlotSentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE,
 	
 	ggplot(final, aes(x = difference, y = terms)) + 
 		geom_point(aes(size = occurrence, colour = color)) + 
-		scale_x_reverse(
-			"Sentiment", limits = c(1,-1), breaks = c(1,0,-1), 
-			labels=c("positive", "neutral", "negative")) +
-				scale_size_discrete("# of\ndocuments",range=c(3,7)) + 
-				theme_bw()+ylab(paste("Top",n2,"terms",tagline,"\nin order of polarity")) + 
-				opts(axis.title.x = theme_text(size=14, face="bold"), 
-						 axis.title.y = theme_text(size=14, face="bold", angle=90),
-						 axis.text.x = theme_text(size=12), 
-						 axis.text.y = theme_text(size=12, hjust=1, vjust=.25),
-						 legend.position="bottom", 
-						 legend.key = theme_rect(colour = 'transparent'),
-						 title = "Sentiment Keywords\n",
-						 plot.title  = theme_text(size=16, face="bold"),
-						 panel.border = theme_rect(colour = "transparent"),
-						 axis.ticks = theme_segment(colour = "transparent"))
+		scale_x_reverse("Sentiment", limits = c(1,-1), breaks = c(1,0,-1), 
+		  labels=c("positive", "neutral", "negative")) +
+		scale_size_discrete("# of\ndocuments",range=c(3,7)) + 
+		theme_bw() + 
+		ylab(paste("Top",n2,"terms",tagline,"\nin order of polarity")) + 
+		opts(axis.title.x = theme_text(size=14, face="bold"), 
+		  axis.title.y = theme_text(size=14, face="bold", angle=90),
+		  axis.text.x = theme_text(size=12), 
+		  axis.text.y = theme_text(size=12, hjust=1, vjust=.25),
+		  legend.position="bottom", 
+		  legend.key = theme_rect(colour = 'transparent'),
+		  title = "Sentiment Keywords\n",
+		  plot.title  = theme_text(size=16, face="bold"),
+		  panel.border = theme_rect(colour = "transparent"),
+		  axis.ticks = theme_segment(colour = "transparent"))
 }
