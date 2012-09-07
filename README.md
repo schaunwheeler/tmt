@@ -20,22 +20,22 @@ Housecleaning:
   
 Preparation:
 
-* `MakeWordLists` take lists of sentiment-laden words from General Iniquirer
+* `MakeWordLists` take lists of sentiment-laden words from General Inquirer
   (http://www.wjh.harvard.edu/~inquirer/), the list compiled by Finn Årup 
   (http://www2.imm.dtu.dk/pubdb/views/publication_details.php?id=6010), or the 
   list compiled by Bing Liu (http://www.cs.uic.edu/~liub/FBS/sentiment-analysis.
   html#lexicon) - or from all three lists (the default). More information about
   these lists and other can be found at http://sentiment.christopherpotts.net/
-  lexicons.html. The function combines and deconflicts the lists, preprocesses
+  lexicons.html. The function combines and de-dupes the lists, preprocesses
   the words to make them compatible with use a regular expression patterns, and
   deconflicts the sentiment words with the list of common English stop words
   from the tm package. It returns a list with three elements - 'pos', 'neg', 
   and 'stops'.
 
-* `CleanText` is a general set of text-cleanin rules. It changes everything to
+* `CleanText` is a general set of text-cleaning rules. It changes everything to
   lower case, removes numbers and punctuation except in contractions, ensures 
   that most contractions with omitted apostrophes get those apostrophes 
-  inserted, and removes specifid stop words. A 'neutralize' option replaces all
+  inserted, and removes specified stop words. A 'neutralize' option replaces all
   empty strings with the word 'neutral' (for purposes of the sentiment-analysis
   function in this package). A vector of words to remove can also be passed to
   the function.
@@ -50,8 +50,8 @@ Spelling Correction:
   It takes as input a single character string. The output has three
   modes. "eval" returns a logical vector indicating whether each word (words are 
   delineated by single spaces) was found in the dictionary. "sugg" returns a 
-  list where each mispelled word is given all suggested alternatives, and where
-  each correclty spelled word is given NA. "fix" replaces each mispelled word
+  list where each misspelled word is given all suggested alternatives, and where
+  each correctly spelled word is given NA. "fix" replaces each misspelled word
   with the word suggested as its most likely alternative. Proper nouns are not
   considered viable alternatives. The 'sep' option take a logical value and 
   specifies whether two separate words should be considered a viable alternative
@@ -68,17 +68,17 @@ Spelling Correction:
 * `SplitWords` takes a character vector, splits it into single words (delineated
   by spaces), keeps all correctly spelled words the same, and splits all 
   misspelled words into multiple words. It does this by splitting the original 
-  word into each possible combinatin of two words, taking the longest first-word
-  option that is recognized in the dicitonary, and then repeating the process 
+  word into each possible combination of two words, taking the longest first-word
+  option that is recognized in the dictionary, and then repeating the process 
   for the remaining characters. A 'correction' option take a logical value. If 
   TRUE, once a word is split, it checks the remaining characters against the
-  dictionary and, if mispelled but having at least one viable alternative, that
+  dictionary and, if misspelled but having at least one viable alternative, that
   alternative is used instead of continuing the splitting.
   
 * NOTE: The AspellCheck() and SplitWords() functions requires that aspell be    
   installed and on the PATH environmental variable. On Windows, download aspell 
   and dictionaries from http://aspell.net/win32/, and set the environmental PATH 
-  variable to include aspell, possibly ising the SetEnvVarW() function in this 
+  variable to include aspell, possibly using the SetEnvVarW() function in this 
   package. On a Mac, download Cocoaspell from http://cocoaspell.leuski.net/, 
   then go into the folder where the dictionaries are kept (probably library/
   Application/Support/cocoAspell/aspell6-en-6.0-0/) and copy all of the 
@@ -104,13 +104,13 @@ Basic Sentiment Analysis:
   each text, divided by the total number of sentiment-laden (positive or 
   negative) words; 'subjectivity' gives the total number of sentiment-laden 
   words divided by the total number of words; 'positivity' and 'negativity' give
-  the total of postive or negative words, respectively, divided by the total 
+  the total of positive or negative words, respectively, divided by the total 
   number of words; 'balance' gives the number of positive words minus the number
   of negative words, divided by the total number of words.
 
 * `PlotSentiment` takes a vector of texts that have already been scored (and 
   assumes the scores run from negative to positive with zero as a neutral point)
   and plots the top n words, as measured either by frequency or polarity. The 
-  default is to use binary measurement - to count a word occurence only once per
+  default is to use binary measurement - to count a word occurrence only once per
   text. If binary is set to FALSE, then the results will reflect total word
-  occurences within the corpus rather than within individual texts.
+  occurrences within the corpus rather than within individual texts.
