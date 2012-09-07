@@ -8,7 +8,7 @@
 # Data Used:       inqtabs.txt, AFINN-111.txt, positive-words.txt, 
 #                  negative-words.txt
 #                  input.docs: set of documents to be corrected and analyzed
-# Packages Used:   tm, Matrix
+# Packages Used:   tm, Snowball, Matrix
 # Output File:     
 # Data Output:     
 # Machine:         Schaun Wheeler's Dell Precision T7500 and MacBook Pro
@@ -20,6 +20,7 @@
 
 # Load libraries
 library(tm)
+library(Snowball)
 
 SetEnvVarW <- function(...){
 
@@ -145,6 +146,68 @@ SetEnvVarW <- function(...){
 						WEKAHOME = weka.path,
 						CLASSPATH = weka.path)
 }
+
+PdfToText <- function(pdfloc, remove = T){
+	
+	pdfloc <- gsub("/$", "", pdfloc)
+	
+	sys <- Sys.info()
+	
+	root <- gsub("(?<=:/)[[:print:]]+","",getwd(),perl=T)
+	
+	locs <- grep("Program Files", list.dirs(root,recursive=F), value=T)
+	
+	pdftotext.path <- grep('pdftotext.exe',list.files(path = locs[1], 
+	  all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+	
+	if(length(pdftotext.path) == 0){
+		pdftotext.path <- grep('pdftotext.exe',list.files(path = locs[2], 
+			all.files = T, full.names = TRUE, recursive = TRUE),value=TRUE)
+	}
+	
+	if(length(pdftotext.path) > 1){
+		if(grepl("64$", sys["machine"])){
+			pdftotext.path <- pdftotext.path[grepl("bin64", pdftotext.path)]
+		}else{
+			pdftotext.path <- pdftotext.path[!grepl("bin64", pdftotext.path)]
+		}
+	}
+	
+	originalwd <- getwd()
+		
+	pdf.files <- list.files(pdfloc)
+	pdf.files.clean <- gsub("\xad|\xe1|[^\x01-\x80]+", "", pdf.files)
+	pdf.files.clean <- gsub("[^[:alpha:]. ]+", "", pdf.files.clean)
+	pdf.files.clean <- tolower(pdf.files.clean)
+	pdf.files.clean <- gsub("(?<=\\s)\\s+|^\\s+|\\s+(?=$)", "", 
+													pdf.files.clean, perl = T)
+	pdf.files.clean <- gsub("\\s+", "_", pdf.files.clean)
+		
+	file.rename(from = paste(pdfloc, "/", pdf.files, sep = ""), 
+	            to = paste(pdfloc, "/", pdf.files.clean, sep = ""))
+	
+	file.copy(from = pdftotext.path, 
+						to = paste(pdfloc,"/pdftotext.exe",sep=""))
+	
+	setwd(pdfloc)
+
+	print("Converting PDFs to text files...")
+	n <- length(pdf.files.clean)
+	pb <- txtProgressBar(min = 1, max = n, style=3)
+	
+	for(i in 1:length(pdf.files.clean)){
+		system(paste("pdftotext ", pdf.files.clean[i], sep = ""), intern = TRUE)
+		setTxtProgressBar(pb, i)
+	}
+	
+	file.remove(paste(pdfloc, "/pdftotext.exe", sep = ""))
+	
+	if(remove == T){
+		file.remove(paste(pdfloc, "/", pdf.files.clean, sep = ""))
+	}
+	setwd(originalwd)
+}
+
 
 MakeWordLists <- functon(wlists = c("gi","afinn","liu")){
 	

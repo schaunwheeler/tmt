@@ -39,6 +39,10 @@ Preparation:
   empty strings with the word 'neutral' (for purposes of the sentiment-analysis
   function in this package). A vector of words to remove can also be passed to
   the function.
+  
+* `PdfToText` converts PDF files to text files. It's argument, 'pdfloc' is the 
+  path of the folder in which the PDFs to convert are located. As a default, it
+  removes the PDF versions of the files after they have been converted to text.
 
 Spelling Correction:
   
