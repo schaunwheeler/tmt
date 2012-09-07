@@ -30,7 +30,7 @@ SetEnvVarW <- function(...){
 	print("    Xpdf from http://www.foolabs.com/xpdf/download.html")
 	print("    Aspell from http://aspell.net/win32/")
 	print("    Package 'rJava' from http://cran.r-project.org/web/packages/rJava/index.html")
-    print("    Package 'RWekajars' from http://cran.r-project.org/web/packages/RWekajars/index.html")
+	print("    Package 'RWekajars' from http://cran.r-project.org/web/packages/RWekajars/index.html")
 	
 	sys <- Sys.info()
 	
