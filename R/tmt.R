@@ -180,7 +180,7 @@ PdfToText <- function(pdfloc, remove = T){
 	pdf.files.clean <- gsub("[^[:alpha:]. ]+", "", pdf.files.clean)
 	pdf.files.clean <- tolower(pdf.files.clean)
 	pdf.files.clean <- gsub("(?<=\\s)\\s+|^\\s+|\\s+(?=$)", "", 
-													pdf.files.clean, perl = T)
+							pdf.files.clean, perl = T)
 	pdf.files.clean <- gsub("\\s+", "_", pdf.files.clean)
 		
 	file.rename(from = paste(pdfloc, "/", pdf.files, sep = ""), 
