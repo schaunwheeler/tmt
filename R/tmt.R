@@ -359,8 +359,8 @@ MakeWordLists <- function(wlists = c("gi","afinn","liu")){
 	pos.stem <- gsub("i$","(i|y)", pos.stem, perl=T)
 	neg.stem <- gsub("i$","(i|y)", neg.stem, perl=T)
 		
-	pos.stem[pos.regex] <- paste(pos.stem[pos.regex],"[[:punct:]\\w]+?",sep="")
-	neg.stem[neg.regex] <- paste(neg.stem[neg.regex],"[[:punct:]\\w]+?",sep="")
+	pos.stem[pos.regex] <- paste(pos.stem[pos.regex],"[[:punct:][:alpha:]]*?",sep="")
+	neg.stem[neg.regex] <- paste(neg.stem[neg.regex],"[[:punct:][:alpha:]]*?",sep="")
 	
 	pos.stem <- gsub("(?<=\\s)\\s+|\\s{2,}|\\s+(?=$)", " ", pos.stem, perl = T)
 	neg.stem <- gsub("(?<=\\s)\\s+|\\s{2,}|\\s+(?=$)", " ", neg.stem, perl = T)
@@ -371,10 +371,6 @@ MakeWordLists <- function(wlists = c("gi","afinn","liu")){
 	pos <- unique(pos.stem)
 	neg <- unique(neg.stem)
 	
-	
-  # De-conflict sentiment lists with stopwords
-	print("De-conflicting sentiment words and stop words")
-
 	pos.dups <- (duplicated(gsub("[[:punct:][:space:]]*", "", pos, fixed = T)) |
 		duplicated(gsub("[[:punct:][:space:]]*", "", pos, fixed=T), fromLast = T)) &
 		!grepl("[[:punct:][:space:]]*", pos, fixed=T)
@@ -386,6 +382,9 @@ MakeWordLists <- function(wlists = c("gi","afinn","liu")){
 	pos <- pos[!pos.dups]
 	neg <- neg[!neg.dups]
 
+	# De-conflict sentiment lists with stopwords
+	print("De-conflicting sentiment words and stop words")
+		
 	posneg <- c(pos,neg)
 	stops <- stopwords()
 	
@@ -594,34 +593,49 @@ SplitWords <- function(x, correction = F){
 	
 }
 
-CompleteStem <- function(stemmed, unstemmed, stem.type="prevalent"){
+CompleteStem <- function(texts, clean = T, stem.type="prevalent",stops=stopwords()){
 	require(tm)
+
+	print("Stemming documents.")
 	
-	stemmed <- strsplit(stemmed, split = " ")[[1]]
-	
-	sent.dict <- strsplit(paste(unstemmed, collapse=" "), split= " ")
-	
-	leave <- (stemmed %in% 
-		aspell(as.factor(stemmed), 
-					 control = c("--master=en_US --sug-mode=ultra"))$Original)
-	
-	if(!is.logical(leave)){
-		leave <- 0
+	if(clean == T){
+	texts <- CleanText(texts, stops = stops)		
 	}
+					
+	stemmed <- llply(texts,function(x){
+		x <- stemDocument(unlist(strsplit(x, split= " ")))
+	}, .progress = "text")
 	
-	out <- stemmed
+	sent.dict <- Corpus(VectorSource(strsplit(paste(texts, collapse=" "), 
+																						split= " ")))
 	
-	if(mean(leave > 0)){
-		x <- stemmed[leave]
+	print("Restemming documents.")
 		
-		restemmed <- try(stemCompletion(x, Corpus(VectorSource(sent.dict)), 
-										type=stem.type), silent=T)
-		if(class(restemmed) == "try-error"){
-			restemmed <- x
+	restemmed <- laply(stemmed,function(x){
+
+		leave <- (x %in% 
+			aspell(as.factor(x), 
+						 control = c("--master=en_US --sug-mode=ultra"))$Original)	
+		
+		if(!is.logical(leave)){
+			leave <- 0
 		}
-		out[leave] <- restemmed
-	}
-	paste(out, collapse = " ")
+		
+		out <- x
+		
+		if(mean(leave > 0)){
+			y <- x[leave]
+			
+			restem <- try(stemCompletion(y, sent.dict, 
+																			type=stem.type), silent=T)
+			if(class(restemmed) == "try-error"){
+				restemmed <- y
+			}
+			out[leave] <- restem
+		}
+		paste(out, collapse = " ")}, .progress = "text")
+	
+	restemmed
 }
 
 GetSentiment <- function(vec, pos, neg){
@@ -706,8 +720,8 @@ WordsBySentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE
 	all.freq <- as.data.frame(cbind(
 		"terms" = rownames(tdm.sparse), 
 		"frequency" = rowSums(tdm.sparse),
-		"positive" = rowSums(tdm.sparse[,colnames(tdm.sparse) %in% posind]),
-		"negative" = rowSums(tdm.sparse[,colnames(tdm.sparse) %in% negind])), 
+		"positive" = rowSums(tdm.sparse[,colnames(tdm.sparse) %in% posind, drop = FALSE]),
+		"negative" = rowSums(tdm.sparse[,colnames(tdm.sparse) %in% negind, drop = FALSE])), 
 					stringsAsFactors = FALSE)
 	
 	all.freq$frequency <- as.numeric(all.freq$frequency)
@@ -720,18 +734,39 @@ WordsBySentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE
 	all.freq$difference <- (all.freq$positive-all.freq$negative)/
 							all.freq$frequency
 	
-	all.freq$polarity <- (all.freq$positive+all.freq$negative)/
+	all.freq$subjectivity <- (all.freq$positive+all.freq$negative)/
 							all.freq$frequency
+
+	if(nrow(all.freq) < n){
+		n <- nrow(all.freq)
+	}
 		
 	final.freq <- arrange(all.freq,-frequency)[1:n,"terms"]
-	final.pola <- arrange(all.freq,-polarity)[1:n,"terms"]
+	final.subj <- arrange(all.freq,-subjectivity)[1:n,"terms"]
 	
 	if(type == "freq"){
-		final.pola <- NULL
+		final.subj <- NULL
 	}
-	if(type == "pola"){
+	if(type == "subj"){
 		final.freq <- NULL
 	}
 	
-	all.freq[all.freq$terms %in% unique(c(final.freq, final.pola)),] 
+	terms.freq <- all.freq[all.freq$terms %in% final.freq,] 
+	terms.subj <- all.freq[all.freq$terms %in% final.subj,]
+	
+	terms.freq$type <- rep("frequency",nrow(terms.freq))
+	terms.subj$type <- rep("subjectivity",nrow(terms.subj))
+	
+	if(type == "freq"){
+		final.subj <- NULL
+	}
+	if(type == "subj"){
+		final.freq <- NULL
+	}
+		
+	out <- rbind(terms.freq,terms.subj)
+	
+	out$type[(out$terms %in% final.freq) & (out$terms %in% final.subj)] <- "both"
+	
+	unique(out)
 }
