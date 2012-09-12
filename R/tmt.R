@@ -252,9 +252,9 @@ MakeWordLists <- function(wlists = c("gi","afinn","liu")){
 	if("liu" %in% wlists){
 		print("Creating lists from Bing Liu lexicon.")
 		
-		liu.pos <- read.delim("https://github.com/schaunwheeler/tmt/blob/master/liu_positive_words.txt", 
+		liu.pos <- read.delim("https://raw.github.com/schaunwheeler/tmt/master/liu_positive_words.txt", 
 								header=F, as.is=T, skip=35)$V1
-		liu.neg <- read.delim("https://github.com/schaunwheeler/tmt/blob/master/liu_negative_words.txt", 
+		liu.neg <- read.delim("https://raw.github.com/schaunwheeler/tmt/master/liu_negative_words.txt", 
 								header=F, as.is=T, skip=35)$V1
 	}
 
@@ -304,44 +304,84 @@ MakeWordLists <- function(wlists = c("gi","afinn","liu")){
 	dupes <- dupes[!(dupes %in% 
 		c("awe", "help","exasper", "irrespons", "dumbfound"))]
 	
+	pos <- pos[!(pos.stem %in% dupes | pos.stem %in% 
+		c("exasper", "irrespons", "dumbfound") |
+		grepl("\\b((does )?not|can[']?t|don[']?t|no|\\s)\\b", pos.stem))]
+	neg <- neg[!(neg.stem %in% dupes | neg.stem %in% 
+		c("awe", "help", "bull****", "bull----", "d*mn", "f**k", "sh*t") |
+		grepl("\\b((does )?not|can[']?t|don[']?t|no|\\s)\\b", neg.stem))]
+		
 	pos.stem <- pos.stem[!(pos.stem %in% dupes | pos.stem %in% 
-		c("exasper", "irrespons", "dumbfound"))]
+		c("exasper", "irrespons", "dumbfound") |
+		grepl("\\b((does )?not|can[']?t|don[']?t|no|\\s)\\b", pos.stem))]
 	neg.stem <- neg.stem[!(neg.stem %in% dupes | neg.stem %in% 
-		c("awe", "help", "bull****", "bull----", "d*mn", "f**k", "sh*t"))]
+		c("awe", "help", "bull****", "bull----", "d*mn", "f**k", "sh*t") |
+		grepl("\\b((does )?not|can[']?t|don[']?t|no|\\s)\\b", neg.stem))]
+
+	pos <- pos[!duplicated(pos.stem)]
+	neg <- neg[!duplicated(neg.stem)]
+	
+	pos.stem <- pos.stem[!duplicated(pos.stem)]
+	neg.stem <- neg.stem[!duplicated(neg.stem)]
+	
+	pos.part <- pos.stem[grepl("([-]|(er|est)$)", pos.stem)]
+	neg.part <- neg.stem[grepl("([-]|(er|est)$)", neg.stem)]
+	
+	pos.part2 <- gsub("(^\\w+)([-]|(er|est)$)([[:print:]]+)?$", "\\1", pos.part)
+	neg.part2 <- gsub("(^\\w+)([-]|(er|est)$)([[:print:]]+)?$", "\\1", neg.part)
+	
+	pos.part.remove <- pos.part[(pos.part2 %in% pos.stem) | (pos.part2 %in% pos)]
+	neg.part.remove <- neg.part[(neg.part2 %in% neg.stem) | (neg.part2 %in% neg)]
+	
+	pos.remove <- (pos.stem %in% pos.part.remove) | (pos %in% pos.part.remove)
+	neg.remove <- (neg.stem %in% neg.part.remove) | (neg %in% neg.part.remove)
+	
+	pos <- pos[!pos.remove]
+	neg <- neg[!neg.remove]
+	
+	pos.stem <- pos.stem[!pos.remove]
+	neg.stem <- neg.stem[!neg.remove]
+	
+	print("Fitting for regex.")
+	
+	pos.regex <- pos != pos.stem
+	neg.regex <- neg != neg.stem
+		
+	pos.stem <- gsub("a[+]\\b", "a[+]|a([-]|\\s)plus", pos.stem)
+	neg.stem <- gsub("naïve", "naive", neg.stem)
+	
+	pos.stem <- gsub("[-]+", "[[:punct:][:space:]]*", pos.stem, perl = T)
+	neg.stem <- gsub("[-]+", "[[:punct:][:space:]]*", neg.stem, perl = T)																
+	
+	pos.stem <- gsub("([[:alpha:]])\\1+","\\1{2,}", pos.stem, perl=T)
+	neg.stem <- gsub("([[:alpha:]])\\1+","\\1{2,}", neg.stem, perl=T)
+	
+	pos.stem <- gsub("i$","(i|y)", pos.stem, perl=T)
+	neg.stem <- gsub("i$","(i|y)", neg.stem, perl=T)
+		
+	pos.stem[pos.regex] <- paste(pos.stem[pos.regex],"[[:punct:]\\w]+?",sep="")
+	neg.stem[neg.regex] <- paste(neg.stem[neg.regex],"[[:punct:]\\w]+?",sep="")
+	
+	pos.stem <- gsub("(?<=\\s)\\s+|\\s{2,}|\\s+(?=$)", " ", pos.stem, perl = T)
+	neg.stem <- gsub("(?<=\\s)\\s+|\\s{2,}|\\s+(?=$)", " ", neg.stem, perl = T)
+	
+	pos.stem <- sort(unique(pos.stem))
+	neg.stem <- sort(unique(neg.stem))
 	
 	pos <- unique(pos.stem)
 	neg <- unique(neg.stem)
 	
-	pos <- gsub("[!#$%&'(),./;<=>?@^_`{|}~]+","[[:punct:]]*", pos)
-	neg <- gsub("[!#$%&'(),./;<=>?@^_`{|}~]+","[[:punct:]]*", neg)
-	
-	pos <- gsub("a[+]\\b", "a[+]|a([-]|\\s)plus", pos)
-	neg <- gsub("naïve", "naive", neg)
-	
-	pos <- gsub("[-]+","([[:punct:]]|\\s)*", pos, perl = T)
-	neg <- gsub("[-]+","([[:punct:]]|\\s)*", neg, perl = T)																
-	
-	pos <- gsub("([[:alpha:]])\\1+","\\1{2,}", pos, perl=T)
-	neg <- gsub("([[:alpha:]])\\1+","\\1{2,}", neg, perl=T)
-	
-	pos <- gsub("(?<=\\s)\\s+|\\s{2,}|\\s+(?=$)", " ", pos, perl = T)
-	neg <- gsub("(?<=\\s)\\s+|\\s{2,}|\\s+(?=$)", " ", neg, perl = T)
-	
-	pos <- sort(unique(pos))
-	neg <- sort(unique(neg))
 	
   # De-conflict sentiment lists with stopwords
 	print("De-conflicting sentiment words and stop words")
 
-	neg <- neg[!(neg %in% "no")]
+	pos.dups <- (duplicated(gsub("[[:punct:][:space:]]*", "", pos, fixed = T)) |
+		duplicated(gsub("[[:punct:][:space:]]*", "", pos, fixed=T), fromLast = T)) &
+		!grepl("[[:punct:][:space:]]*", pos, fixed=T)
 	
-	pos.dups <- (duplicated(gsub("([[:punct:]]|s)*", "", pos, fixed = T)) |
-		duplicated(gsub("([[:punct:]]|s)*", "", pos, fixed=T), fromLast = T)) &
-		!grepl("([[:punct:]]|s)*", pos, fixed=T)
-	
-	neg.dups <- (duplicated(gsub("([[:punct:]]|s)*", "", neg, fixed = T)) |
-		duplicated(gsub("([[:punct:]]|s)*", "", neg, fixed=T), fromLast = T)) &
-		!grepl("([[:punct:]]|s)*", neg, fixed=T)
+	neg.dups <- (duplicated(gsub("[[:punct:][:space:]]*", "", neg, fixed = T)) |
+		duplicated(gsub("[[:punct:][:space:]]*", "", neg, fixed=T), fromLast = T)) &
+		!grepl("[[:punct:][:space:]]**", neg, fixed=T)
 	
 	pos <- pos[!pos.dups]
 	neg <- neg[!neg.dups]
@@ -639,7 +679,7 @@ GetSentiment <- function(vec, pos, neg){
 			 "balance" = balance))
 }
 
-PlotSentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE, 
+WordsBySentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE, 
 													...){
 	require(tm)
 	require(Matrix)
@@ -693,54 +733,5 @@ PlotSentiment <- function(texts, scores, type = "both", n = 20, binary = TRUE,
 		final.freq <- NULL
 	}
 	
-	final <- all.freq[all.freq$terms %in% unique(c(final.freq, final.pola)),] 
-	
-	final$occurrence <- cut(
-		final$frequency,
-		round(quantile(final$frequency,
-									 probs=c(0, .2, .4, .6, .8, .99, 1)),
-					digits=0),include.lowest = T)
-	
-	levels(final$occurrence) <- gsub("[,]", "-", levels(final$occurrence))
-	levels(final$occurrence) <- gsub("[^[:digit:]-]", "", 
-										levels(final$occurrence))
-	
-	
-	final$terms <- reorder.factor(as.factor(final$terms), 
-					new.order = arrange(final,polarity)[,"terms"])
-	
-	final$color <- rep(NA, nrow(final))
-	final$color[final$terms %in% final.freq] <- "High Frequency"
-	final$color[final$terms %in% final.pola] <- "High Polarity"
-	final$color[(final$terms %in% final.pola) & 
-	  (final$terms %in% final.freq)] <- "High Frequency and Polarity"
-	
-	n2 <- ifelse(type == "both",n*2,n)
-	if(type == "both"){
-		tagline <- "(frequency and polarity)"
-	}else{
-		if(type == "freq"){
-			tagline <- "(frequency)"
-		}else{
-			tagline <- "(polarity)"
-		}
-	}
-	
-	ggplot(final, aes(x = difference, y = terms)) + 
-		geom_point(aes(size = occurrence, colour = color)) + 
-		scale_x_reverse("Sentiment", limits = c(1,-1), breaks = c(1,0,-1), 
-		  labels=c("positive", "neutral", "negative")) +
-		scale_size_discrete("# of\ndocuments",range=c(3,7)) + 
-		theme_bw() + 
-		ylab(paste("Top",n2,"terms",tagline,"\nin order of polarity")) + 
-		opts(axis.title.x = theme_text(size=14, face="bold"), 
-		  axis.title.y = theme_text(size=14, face="bold", angle=90),
-		  axis.text.x = theme_text(size=12), 
-		  axis.text.y = theme_text(size=12, hjust=1, vjust=.25),
-		  legend.position="bottom", 
-		  legend.key = theme_rect(colour = 'transparent'),
-		  title = "Sentiment Keywords\n",
-		  plot.title  = theme_text(size=16, face="bold"),
-		  panel.border = theme_rect(colour = "transparent"),
-		  axis.ticks = theme_segment(colour = "transparent"))
+	all.freq[all.freq$terms %in% unique(c(final.freq, final.pola)),] 
 }
