@@ -208,7 +208,6 @@ PdfToText <- function(pdfloc, remove = T){
 	setwd(originalwd)
 }
 
-
 MakeWordLists <- function(wlists = c("gi","afinn","liu")){
 	
 	require(tm)
