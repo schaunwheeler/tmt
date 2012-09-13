@@ -450,91 +450,100 @@ CleanText <- function(x, stops, neutralize=T, remove=NULL){
 }
 
 AspellCheck <- function(input, output = "eval", sep = FALSE, cap.flag = "none", 
-						ignore=NULL, split.missing = FALSE){
+												ignore=NULL, split.missing = FALSE, progress = "text"){
 	
-	input <- unlist(strsplit(input, split="\\s+"))
-	
-	if(grepl("first|all|none", cap.flag)){
-		if(cap.flag=="first"){
-			flag.words <- grepl("^[[:upper:]][[:lower:]]+$", input)
-		}
-		if(cap.flag=="all"){
-			flag.words <- grepl("^[[:upper:]]+$", input)
-		}
-		if(cap.flag=="none"){
-			flag.words <- rep(FALSE,length(input))
-		}
-	}else{
-		stop("cap.flag must be 'first', 'all', or 'none")
-	}
-	
-	
-	ignore.words <- tolower(input) %in% tolower(ignore)
-	skip.words <- ignore.words | flag.words
-	
-	x <- input[!skip.words]
-	
-	check <- aspell(as.factor(x), 
-					control = c("--master=en_US --sug-mode=fast"))
-	
-	if(nrow(check)==0){
-		if(output == "eval"){
-			out <- rep(TRUE,length(x))
-		}
-		if(output == "sugg"){
-			out <- rep(NA,length(x))
-		}
-		if(output == "fix"){
-			out <- paste(input, collapse = " ")
-		}
-	}else{
+	aspell.internal <- function(inp,...){
 		
-		pattern <- ifelse(sep, "^[a-z ]+$", "^[a-z]+$")
-		good <- !(x %in% check$Original)
-		missing <- x %in% check$Original[sapply(check$Suggestions,is.null)]
-		xeval <- x[!good & !missing]
+		input <- unlist(strsplit(inp, split="\\s+"))
 		
-		if(output == "eval"){
-			out <- good
+		if(grepl("first|all|none", cap.flag)){
+			if(cap.flag=="first"){
+				flag.words <- grepl("^[[:upper:]][[:lower:]]+$", input)
+			}
+			if(cap.flag=="all"){
+				flag.words <- grepl("^[[:upper:]]+$", input)
+			}
+			if(cap.flag=="none"){
+				flag.words <- rep(FALSE,length(input))
+			}
+		}else{
+			stop("cap.flag must be 'first', 'all', or 'none")
 		}
-		if(output == "sugg"){
-			out <- rep(NA,length(x))
-			out[!good] <- check$Suggestions
-		}
-		if(output == "fix"){
-			if(length(xeval) == 0){
-				out <- ifelse(split.missing,SplitWords(x),x)
-			}else{
-				ind <- mapply(grepl, pattern, check$Suggestions)
-				ind.list <- is.list(ind)
-				if(ind.list == T){
-					ind <- unlist(sapply(ind, which.max))
+		
+		
+		ignore.words <- tolower(input) %in% tolower(ignore)
+		skip.words <- ignore.words | flag.words
+		
+		x <- input[!skip.words]
+		
+		check <- aspell(as.factor(x), 
+										control = c("--master=en_US --sug-mode=fast"))
+		
+		if(nrow(check)==0){
+			if(output == "eval"){
+				out <- rep(TRUE,length(x))
+			}
+			if(output == "sugg"){
+				out <- rep(NA,length(x))
+			}
+			if(output == "fix"){
+				out <- paste(input, collapse = " ")
+			}
+		}else{
+			
+			pattern <- ifelse(sep, "^[a-z ]+$", "^[a-z]+$")
+			good <- !(x %in% check$Original)
+			missing <- x %in% check$Original[sapply(check$Suggestions,is.null)]
+			xeval <- x[!good & !missing]
+			
+			if(output == "eval"){
+				out <- good
+			}
+			if(output == "sugg"){
+				out <- rep(NA,length(x))
+				out[!good] <- check$Suggestions
+			}
+			if(output == "fix"){
+				if(length(xeval) == 0){
+					out <- ifelse(split.missing,SplitWords(x),x)
 				}else{
-					ind <- which.max(ind)
-				}
-				picked <- rep(NA,length(ind))
-				for(i in 1:length(ind)){
-					picked[i] <- check$Suggestions[!missing][[i]][ind[i]]}
-				out <- x
-				out[!good & !missing] <- picked
-				if(split.missing == TRUE & sum(missing)>0){
-					out[missing] <- SplitWords(out[missing])
+					ind <- mapply(grepl, pattern, check$Suggestions)
+					ind.list <- is.list(ind)
+					if(ind.list == T){
+						ind <- unlist(sapply(ind, which.max))
+					}else{
+						ind <- which.max(ind)
+					}
+					picked <- rep(NA,length(ind))
+					for(i in 1:length(ind)){
+						picked[i] <- check$Suggestions[!missing][[i]][ind[i]]}
+					out <- x
+					out[!good & !missing] <- picked
+					if(split.missing == TRUE & sum(missing)>0){
+						out[missing] <- SplitWords(out[missing])
+					}
 				}
 			}
 		}
+		
+		
+		if(grepl("eval|sugg", output) == TRUE | 
+			(grepl("fix", output) == TRUE & length(xeval) == 0)){
+			final <- out
+		}else{
+			final <- input
+			final[!skip.words] <- out
+			final <- paste(final, collapse=" ")
+			final <- gsub("^\\s+|\\s+$|(?<=\\s)\\s+","",final,perl=TRUE)
+		}
+		final
 	}
 	
-	
-	if(grepl("eval|sugg", output) == TRUE | 
-		(grepl("fix", output) == TRUE & length(xeval) == 0)){
-		final <- out
+	if(output == "fix"){
+		laply(input, aspell.internal, .progress = progress)
 	}else{
-		final <- input
-		final[!skip.words] <- out
-		final <- paste(final, collapse=" ")
-		final <- gsub("^\\s+|\\s+$|(?<=\\s)\\s+","",final,perl=TRUE)
+		llply(input, aspell.internal, .progress = progress)
 	}
-	final
 }
 
 SplitWords <- function(x, correction = F){
