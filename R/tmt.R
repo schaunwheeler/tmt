@@ -449,7 +449,7 @@ CleanText <- function(x, stops, neutralize=T, remove=NULL){
 }
 
 AspellCheck <- function(input, output = "eval", sep = FALSE, cap.flag = "none", 
-												ignore=NULL, split.missing = FALSE, progress = "text"){
+ignore=NULL, split.missing = FALSE, progress = "text"){
 	
 	aspell.internal <- function(inp,...){
 		
@@ -476,7 +476,7 @@ AspellCheck <- function(input, output = "eval", sep = FALSE, cap.flag = "none",
 		x <- input[!skip.words]
 		
 		check <- aspell(as.factor(x), 
-										control = c("--master=en_US --sug-mode=fast"))
+		control = c("--master=en_US --sug-mode=fast"))
 		
 		if(nrow(check)==0){
 			if(output == "eval"){
