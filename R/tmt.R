@@ -347,7 +347,7 @@ MakeWordLists <- function(wlists = c("gi","afinn","liu")){
 	neg.regex <- neg != neg.stem
 		
 	pos.stem <- gsub("a[+]\\b", "a[+]|a([-]|\\s)plus", pos.stem)
-	neg.stem <- gsub("naïve", "naive", neg.stem)
+	neg.stem <- gsub("naC/ve", "naive", neg.stem)
 	
 	pos.stem <- gsub("[-]+", "[[:punct:][:space:]]*", pos.stem, perl = T)
 	neg.stem <- gsub("[-]+", "[[:punct:][:space:]]*", neg.stem, perl = T)																
@@ -469,13 +469,13 @@ ignore=NULL, split.missing = FALSE, progress = "text"){
 			stop("cap.flag must be 'first', 'all', or 'none")
 		}
 		
-		
 		ignore.words <- tolower(input) %in% tolower(ignore)
 		skip.words <- ignore.words | flag.words
 		
 		x <- input[!skip.words]
+		x.uniq <- unique(x)
 		
-		check <- aspell(as.factor(x), 
+		check <- aspell(as.factor(x.uniq), 
 		control = c("--master=en_US --sug-mode=fast"))
 		
 		if(nrow(check)==0){
@@ -524,8 +524,7 @@ ignore=NULL, split.missing = FALSE, progress = "text"){
 				}
 			}
 		}
-		
-		
+				
 		if(grepl("eval|sugg", output) == TRUE | 
 			(grepl("fix", output) == TRUE & length(xeval) == 0)){
 			final <- out
