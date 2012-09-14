@@ -480,10 +480,10 @@ ignore=NULL, split.missing = FALSE, progress = "text"){
 		
 		if(nrow(check)==0){
 			if(output == "eval"){
-				out <- rep(TRUE,length(x))
+				out <- rep(TRUE,length(input))
 			}
 			if(output == "sugg"){
-				out <- rep(NA,length(x))
+				out <- rep(NA,length(input))
 			}
 			if(output == "fix"){
 				out <- paste(input, collapse = " ")
@@ -496,11 +496,12 @@ ignore=NULL, split.missing = FALSE, progress = "text"){
 			xeval <- x[!good & !missing]
 			
 			if(output == "eval"){
-				out <- good
+				out <- rep(TRUE,length(input))
+				out[!skip.words] <- good
 			}
 			if(output == "sugg"){
-				out <- rep(NA,length(x))
-				out[!good] <- check$Suggestions
+				out <- rep(NA,length(input))
+				out[!skip.words][!good] <- check$Suggestions
 			}
 			if(output == "fix"){
 				if(length(xeval) == 0){
