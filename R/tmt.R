@@ -449,7 +449,7 @@ CleanText <- function(x, stops, neutralize=T, remove=NULL){
 }
 
 AspellCheck <- function(input, output = "eval", sep = FALSE, cap.flag = "none", 
-ignore=NULL, split.missing = FALSE, progress = "text"){
+ignore=NULL, split.missing = FALSE, progress = "text", parallel = FALSE){
 	
 	aspell.internal <- function(inp,...){
 		
@@ -539,9 +539,9 @@ ignore=NULL, split.missing = FALSE, progress = "text"){
 	}
 	
 	if(output == "fix"){
-		laply(input, aspell.internal, .progress = progress)
+		laply(input, aspell.internal, .progress = progress, .parallel = parallel)
 	}else{
-		llply(input, aspell.internal, .progress = progress)
+		llply(input, aspell.internal, .progress = progress, .parallel = parallel)
 	}
 }
 
