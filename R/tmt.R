@@ -481,12 +481,15 @@ ignore=NULL, split.missing = FALSE, progress = "text", parallel = FALSE){
 		if(nrow(check)==0){
 			if(output == "eval"){
 				out <- rep(TRUE,length(input))
+				xeval <- data.frame()
 			}
 			if(output == "sugg"){
 				out <- rep(NA,length(input))
+				xeval <- data.frame()
 			}
 			if(output == "fix"){
 				out <- paste(input, collapse = " ")
+				xeval <- data.frame()
 			}
 		}else{
 			
