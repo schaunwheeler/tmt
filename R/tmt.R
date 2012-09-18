@@ -476,7 +476,7 @@ ignore=NULL, split.missing = FALSE, progress = "text", parallel = FALSE){
 		x.uniq <- unique(x)
 		
 		check <- aspell(as.factor(x.uniq), 
-		control = c("--master=en_US --sug-mode=fast"))
+		control = c("--master=en_US --sug-mode=ultra"))
 		
 		if(nrow(check)==0){
 			if(output == "eval"){
@@ -521,7 +521,7 @@ ignore=NULL, split.missing = FALSE, progress = "text", parallel = FALSE){
 					for(i in 1:length(ind)){
 						picked[i] <- check$Suggestions[!missing][[i]][ind[i]]}
 					out <- x
-					out[!good & !missing] <- picked
+					out[!good & !missing] <- picked[match(out[!good & !missing],check$Original)]
 					if(split.missing == TRUE & sum(missing)>0){
 						out[missing] <- SplitWords(out[missing])
 					}
