@@ -519,7 +519,8 @@ ignore=NULL, split.missing = FALSE, progress = "text", parallel = FALSE){
 					}
 					picked <- rep(NA,length(ind))
 					for(i in 1:length(ind)){
-						picked[i] <- check$Suggestions[!missing][[i]][ind[i]]}
+						picked[i] <- check$Suggestions[!sapply(check$Suggestions,
+																									 is.null)][[i]][ind[i]]}
 					out <- x
 					out[!good & !missing] <- picked[match(out[!good & !missing],check$Original)]
 					if(split.missing == TRUE & sum(missing)>0){
