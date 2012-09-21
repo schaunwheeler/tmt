@@ -522,7 +522,8 @@ ignore=NULL, split.missing = FALSE, progress = "text", parallel = FALSE){
 						picked[i] <- check$Suggestions[!sapply(check$Suggestions,
 																									 is.null)][[i]][ind[i]]}
 					out <- x
-					out[!good & !missing] <- picked[match(out[!good & !missing],check$Original)]
+					out[!good & !missing] <- picked[match(out[!good & !missing],
+																								check$Original)]
 					if(split.missing == TRUE & sum(missing)>0){
 						out[missing] <- SplitWords(out[missing])
 					}
