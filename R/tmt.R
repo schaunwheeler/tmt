@@ -141,7 +141,7 @@ SetEnvVarW <- function(...){
 						 		rJava.path,
 						 		java.path,
 						 		jvm.path, 
-						 	sep = ";"), 
+						 	collapse = ";"), 
 						NOAWT = "TRUE",
 						WEKAHOME = weka.path,
 						CLASSPATH = weka.path)
