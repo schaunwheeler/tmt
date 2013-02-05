@@ -624,7 +624,7 @@ CompleteStem <- function(texts, clean = T, stem.type="prevalent",stops=stopwords
 	
 	print("Restemming documents.")
 		
-	restemmed <- laply(stemmed,function(x){
+	restemmed <- laply(stemmed,function(x, ...){
 
 		leave <- (x %in% 
 			aspell(as.factor(x), 
@@ -636,13 +636,13 @@ CompleteStem <- function(texts, clean = T, stem.type="prevalent",stops=stopwords
 		
 		out <- x
 		
-		if(mean(leave > 0)){
+		if(mean(leave) > 0){
 			y <- x[leave]
 			
 			restem <- try(stemCompletion(y, sent.dict, 
 																			type=stem.type), silent=T)
-			if(class(restemmed) == "try-error"){
-				restemmed <- y
+			if(class(restem) == "try-error"){
+				restem <- y
 			}
 			out[leave] <- restem
 		}
