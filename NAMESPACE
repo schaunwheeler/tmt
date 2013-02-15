@@ -9,6 +9,5 @@ export(SplitWords)
 
 # Import all packages listed as Imports or Depends
 import(
-  tm,
-  Snowball
+  tm
 )
