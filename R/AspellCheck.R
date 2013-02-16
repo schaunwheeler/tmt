@@ -1,101 +1,123 @@
-AspellCheck <- function(input, output = "eval", sep = FALSE, cap.flag = "none", 
-  ignore=NULL, split.missing = FALSE, progress = "text", parallel = FALSE){
+AspellCheck <- function(input, output = "eval", sep = FALSE, keep_caps = TRUE,
+  pattern_flag = NULL, word_flag = NULL, split_missing = FALSE, 
+  mode = "ultra", dict = "en_US", ...){
   
-  aspell.internal <- function(inp,...){
+  input <- lapply(1:length(input), function(i) {
+    words <- unlist(strsplit(input[i], "\\s+"))
+    index <- rep(i, length(words))
+    cbind(words,index)
+  })
+  
+  input <- data.frame(do.call("rbind", input), stringsAsFactors = FALSE)
+  
+  input_caps_first <- grepl("^[[:upper:]][[:lower:]]", input$words)
+  input_caps_all <- grepl("^[[:upper:]]+$", input$words)
+  
+  if(!is.null(pattern_flag)) {
+    pattern_flag <- lapply(pattern_flag, function(x, ...) {
+      grepl(x, input$words)
+    })
+    pattern_flag <- rowSums(do.call("cbind", pattern_flag), na.rm = TRUE) > 0
+  } else {
+    pattern_flag <- rep(FALSE, length(input$words))
+  }
+  
+  if(!is.null(word_flag)) {
+    word_flag <- input$words %in% word_flag
+  } else {
+    word_flag <- rep(FALSE, length(input$words))
+  }
     
-    input <- unlist(strsplit(inp, split="\\s+"))
+  input$words <- tolower(input$words)
+  
+  input_duplicated <- duplicated(input$words)
+  
+  input_words <- input$words[!pattern_flag & !word_flag & !input_duplicated]
+  
+  check <- aspell(as.factor(input_words), 
+      control = paste(
+          paste0("--master=",dict),
+          paste0("--sug-mode=", mode)
+        )
+  )
     
-    if(grepl("first|all|none", cap.flag)){
-      if(cap.flag=="first"){
-        flag.words <- grepl("^[[:upper:]][[:lower:]]+$", input)
+    if(nrow(check) == 0) {
+      if(output == "eval") {
+        out <- rep(TRUE,length(input$words))
       }
-      if(cap.flag=="all"){
-        flag.words <- grepl("^[[:upper:]]+$", input)
+      if(output == "sugg") {
+        out <- rep(NA, length(input$words))
       }
-      if(cap.flag=="none"){
-        flag.words <- rep(FALSE,length(input))
+      if(output == "fix") {
+        out <- input$words
       }
-    }else{
-      stop("cap.flag must be 'first', 'all', or 'none")
-    }
-    
-    ignore.words <- tolower(input) %in% tolower(ignore)
-    skip.words <- ignore.words | flag.words
-    
-    x <- input[!skip.words]
-    x.uniq <- unique(x)
-    
-    check <- aspell(as.factor(x.uniq), 
-      control = c("--master=en_US --sug-mode=ultra"))
-    
-    if(nrow(check)==0){
+    } else {
+      
+      sep_pattern <- ifelse(sep, "^[a-z ]+$", "^[a-z]+$")
+      
       if(output == "eval"){
-        out <- rep(TRUE,length(input))
-        xeval <- data.frame()
+        out <- rep(TRUE, length(input$words))
+        out[!is.na(match(input$words, check$Original))] <- FALSE
+        out[pattern_flag | word_flag] <- TRUE
+        final_words <- tapply(out, input$index, "c")
       }
       if(output == "sugg"){
-        out <- rep(NA,length(input))
-        xeval <- data.frame()
+        out <- check$Suggestions[match(input$words, check$Original)]
+        out[sapply(out, is.null)] <- NA
+        final_words <- tapply(out, input$index, "c")
       }
       if(output == "fix"){
-        out <- paste(input, collapse = " ")
-        xeval <- data.frame()
-      }
-    }else{
-      
-      pattern <- ifelse(sep, "^[a-z ]+$", "^[a-z]+$")
-      good <- !(x %in% check$Original)
-      missing <- x %in% check$Original[sapply(check$Suggestions,is.null)]
-      xeval <- x[!good & !missing]
-      
-      if(output == "eval"){
-        out <- rep(TRUE,length(input))
-        out[!skip.words] <- good
-      }
-      if(output == "sugg"){
-        out <- rep(NA,length(input))
-        out[!skip.words][!good] <- check$Suggestions
-      }
-      if(output == "fix"){
-        if(length(xeval) == 0){
-          out <- ifelse(split.missing,SplitWords(x),x)
-        }else{
-          ind <- mapply(grepl, pattern, check$Suggestions)
-          ind.list <- is.list(ind)
-          if(ind.list == T){
-            ind <- unlist(sapply(ind, which.max))
+        recs <- mapply(grepl, sep_pattern, check$Suggestions)
+        recs[sapply(recs, length) == 0] <- FALSE
+          if(is.list(recs)){
+            recs <- unlist(sapply(recs, which.max))
           }else{
-            ind <- which.max(ind)
+            recs <- which.max(recs)
           }
-          picked <- rep(NA,length(ind))
-          for(i in 1:length(ind)){
-            picked[i] <- check$Suggestions[!sapply(check$Suggestions,
-              is.null)][[i]][ind[i]]}
-          out <- x
-          out[!good & !missing] <- picked[match(out[!good & !missing],
-            check$Original)]
-          if(split.missing == TRUE & sum(missing)>0){
-            out[missing] <- SplitWords(out[missing])
-          }
+        recs <- sapply(1:length(recs), function(i) {
+          out <- check$Suggestions[[i]][recs[i]]
+        })
+        
+        if(split_missing) {
+          recs[sapply(recs, is.null)] <-  Split_Words(
+            check$Original[sapply(recs, is.null)]
+            )
+        } else {
+        recs[sapply(recs, is.null)] <- check$Original[sapply(recs, is.null)]
         }
+        
+        recs <- recs[match(input$words, check$Original)]
+        
+        recs[sapply(recs, is.null)] <- input$words[sapply(recs, is.null)]
+        
+        recs <- unlist(recs)
+        
+        recs[pattern_flag | word_flag] <- input$words[pattern_flag | word_flag]
+
+        if(keep_caps) {
+          recs[input_caps_first] <- gsub("(^[[:alpha:]])", "\\U\\1", 
+                                         recs[input_caps_first], perl = TRUE)
+          
+          recs[input_caps_all] <- gsub("([[:alpha:]])", "\\U\\1", 
+                                       recs[input_caps_all], perl = TRUE)
+        }
+        
+        out <- recs
+        
+        final_words <- tapply(out, input$index, "paste", collapse = " ")
+        
       }
+      
+      final_index <- as.numeric(names(final_words))
+      
+      final <- data.frame(
+        "words" = final_words,
+        "index" = final_index,
+        stringsAsFactors = FALSE)
+      
+      final <- final[order(final$index),]
     }
-    
-    if(grepl("eval|sugg", output) == TRUE | 
-        (grepl("fix", output) == TRUE & length(xeval) == 0)){
-      final <- out
-    }else{
-      final <- input
-      final[!skip.words] <- out
-      final <- paste(final, collapse=" ")
-      final <- gsub("^\\s+|\\s+$|(?<=\\s)\\s+","",final,perl=TRUE)
-    }
-    final
-  }
+
+  as.vector(final$words)
   
-  if(output == "fix"){
-    laply(input, aspell.internal, .progress = progress, .parallel = parallel)
-  }else{
-    llply(input, aspell.internal, .progress = progress, .parallel = parallel)
-  }
 }
