@@ -11,5 +11,5 @@
   data(holbrook)
 }
 \format{
-  A vector of 93 character strings.
+  A vector of 84 character strings.
 }
