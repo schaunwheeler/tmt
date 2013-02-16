@@ -5,13 +5,6 @@
 export(SetEnvVarW)
 export(AspellCheck)
 export(CompleteStem)
-export(holbrook)
-export(liu_pos)
-export(liu_neg)
-export(afinn_pos)
-export(afinn_neg)
-export(gi_pos)
-export(gi_neg)
 
 # Import all packages listed as Imports or Depends
 import(
