@@ -10,3 +10,6 @@ export(CompleteStem)
 import(
   tm
 )
+
+LazyData: yes 
+LazyLoad: yes 
