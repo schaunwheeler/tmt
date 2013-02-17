@@ -9,3 +9,4 @@ Author: Schaun Wheeler <schaun.wheeler@gmail.com>
 Depends: R (>= 2.13.0), tm, Snowball
 License: GPL
 LazyLoad:  true
+LazyData: true
