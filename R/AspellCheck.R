@@ -1,4 +1,4 @@
-AspellCheck <- function(input, output = "eval", sep = FALSE, keep_caps = TRUE,
+aspellCheck <- function(input, output = "eval", sep = FALSE, keep_caps = TRUE,
   pattern_flag = NULL, word_flag = NULL, split_missing = FALSE, 
   mode = "ultra", dict = "en_US", ...){
   

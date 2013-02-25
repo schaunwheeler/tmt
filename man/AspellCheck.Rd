@@ -1,5 +1,5 @@
-\name{AspellCheck}
-\alias{AspellCheck}
+\name{aspellCheck}
+\alias{aspellCheck}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Automatically check or correct spelling in a vector of texts

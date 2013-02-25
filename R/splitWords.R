@@ -1,4 +1,4 @@
-split_words <- function(inp, ...) {
+splitWords <- function(inp, ...) {
     
   inp_nchar <- nchar(inp)
   inp_check <- rep(FALSE, length(inp))

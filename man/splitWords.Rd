@@ -1,5 +1,5 @@
-\name{split_words}
-\alias{split_words}
+\name{splitWords}
+\alias{splitWords}
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{
   Split words into smaller chunks
