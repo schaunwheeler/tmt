@@ -46,7 +46,7 @@ Preparation:
 
 Spelling Correction:
   
-* `AspellCheck` is a wrapper for the aspell() function in the R utils package.
+* `aspellCheck` is a wrapper for the aspell() function in the R utils package.
   It takes as input a single character string. The output has three
   modes. "eval" returns a logical vector indicating whether each word (words are 
   delineated by single spaces) was found in the dictionary. "sugg" returns a 
@@ -65,7 +65,7 @@ Spelling Correction:
   function in this package in each case where a word is not found in the
   dictionary and a viable alternative cannot be found.
 
-* `SplitWords` takes a character vector, splits it into single words (delineated
+* `aplitWords` takes a character vector, splits it into single words (delineated
   by spaces), keeps all correctly spelled words the same, and splits all 
   misspelled words into multiple words. It does this by splitting the original 
   word into each possible combination of two words, taking the longest first-word
@@ -75,7 +75,7 @@ Spelling Correction:
   dictionary and, if misspelled but having at least one viable alternative, that
   alternative is used instead of continuing the splitting.
   
-* NOTE: The AspellCheck() and SplitWords() functions requires that aspell be    
+* NOTE: The aspellCheck() and splitWords() functions requires that aspell be    
   installed and on the PATH environmental variable. On Windows, download aspell 
   and dictionaries from http://aspell.net/win32/, and set the environmental PATH 
   variable to include aspell, possibly using the SetEnvVarW() function in this 
@@ -86,7 +86,7 @@ Spelling Correction:
   then navigate to /usr/loca/lib/aspell-0.60/ and paste them all in that 
   directory.
 
-* `CompleteStem` combined aspell() with the tm package's stemCompletion()
+* `completeStem` combined aspell() with the tm package's stemCompletion()
   function. Given a vector of sample text, it compiles that text into a 
   dictionary. It then evaluates each word from a character string of stemmed
   (as well as unstemmed, if you like) words using aspell(). If a word is found

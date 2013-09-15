@@ -39,9 +39,7 @@ aspellStem <- function(texts, clean = FALSE, pattern_flag = NULL,
   
   stemmed <- stemDocument(input_words)
   
-  sent.dict <- Corpus(VectorSource(input$words))
-  
-  restem <- try(stemCompletion(stemmed, sent.dict, type=stem.type), 
+  restem <- try(stemCompletion(stemmed, input$words, type=stem.type), 
                 silent = TRUE)
   if(class(restem) == "try-error"){
     restem <- input_words
