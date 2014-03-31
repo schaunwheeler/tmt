@@ -12,7 +12,7 @@ GetSentiment <- function(vec, pos, neg){
     first <- mapply(function(x,...){sum(x!=(-1))}, 
       gregexpr(paste("\\b",pos[i],"\\b", sep=""), vec))
     fake <- mapply(function(x,...){sum(x!=(-1))}, 
-      gregexpr(paste("(not|no)\\s(\\w+\\s)?",pos[i],"\\b"), vec))
+      gregexpr(paste0("(not|no)\\s(\\w+\\s)?",pos[i],"\\b"), vec))
     out <- first-fake
     setTxtProgressBar(pb, i)
     out
@@ -26,7 +26,7 @@ GetSentiment <- function(vec, pos, neg){
     first <- mapply(function(x,...){sum(x!=(-1))}, 
       gregexpr(paste("\\b",neg[i],"\\b", sep=""), vec))
     fake <- mapply(function(x,...){sum(x!=(-1))}, 
-      gregexpr(paste("(not|no)\\s(\\w+\\s)?",neg[i],"\\b"), vec))
+      gregexpr(paste0("(not|no)\\s(\\w+\\s)?",neg[i],"\\b"), vec))
     out <- first-fake
     setTxtProgressBar(pb, i)
     out
