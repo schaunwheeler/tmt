@@ -6,6 +6,6 @@ Version: 0.01
 Date: 2013-14-2
 Maintainer: Schaun Wheeler <schaun.wheeler@gmail.com>
 Author: Schaun Wheeler <schaun.wheeler@gmail.com>
-Depends: R (>= 2.13.0), tm, Snowball
+Depends: R (>= 2.13.0), tm, SnowballC
 License: GPL
 LazyData: true
