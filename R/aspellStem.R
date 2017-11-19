@@ -1,7 +1,7 @@
 aspellStem <- function(texts, clean = FALSE, pattern_flag = NULL, 
   word_flag = NULL, stem.type="prevalent",stops=stopwords()){
   require(tm)
-  require(Snowball)
+  require(SnowballC)
   Sys.setenv(NOAWT = TRUE) 
   
   if(clean == T){
